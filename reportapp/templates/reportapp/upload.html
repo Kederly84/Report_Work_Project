@@ -1,0 +1,37 @@
+{% extends 'reportapp/base.html' %}
+{% block content %}
+
+    {% if file_url %}
+        <h2 class="my-4">Загруженные файлы</h2>
+        <div class="col-lg-3 col-md-6 col-sm-6 pb-4">
+            <p>Uploaded to: {{ file_url }}</p>
+            <a class="btn btn-dark my-4" href="{% url 'report:home' %}">Вернуться на главную</a>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="exampleInputEmail1" class="form-label">Введи Delete для удаления всех
+                        файлов</label>
+                    <input type="text" class="form-control" name="delete">
+                </div>
+                <button class="btn btn-danger my-1" type="submit">Удалить файл</button>
+            </form>
+        </div>
+    {% else %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-5">
+                    <h2 class="my-4">Выбери файл для загрузки</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-1">
+                            <input class="form-control" type="file" name="upload" id="formFile">
+                        </div>
+                        <br>
+                        <button class="btn btn-success" type="submit">Загрузить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+{% endblock %}

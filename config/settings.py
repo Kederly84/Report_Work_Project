@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
@@ -40,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'authapp',
+    'reportapp',
     'crispy_forms',
+    'rangefilter',
 ]
 
 MIDDLEWARE = [
@@ -128,7 +129,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'authapp.User'
 
-LOGIN_REDIRECT_URL = 'authapp:password'
+LOGIN_REDIRECT_URL = 'reportapp:home'
+
+LOGOUT_REDIRECT_URL = 'reportapp:home'
 
 # Authentication backends
 
@@ -136,3 +139,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'authapp.auth.EmailBackend',
 )
+
+# Media
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'

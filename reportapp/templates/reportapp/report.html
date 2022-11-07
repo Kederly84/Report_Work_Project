@@ -1,0 +1,99 @@
+{% extends 'reportapp/base.html' %}
+{% load extras %}
+{% block content %}
+    <div class="container justify-content-center mt-2">
+        <canvas id="chart"></canvas>
+    </div>
+
+    <div class="container justify-content-center mt-2">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th scope="col">Контактный центр</th>
+                <th scope="col">Запланированное время</th>
+                <th scope="col">Ready</th>
+                <th scope="col">Доля Ready</th>
+                <th scope="col">Adherence</th>
+                <th scope="col">Больничные</th>
+                <th scope="col">Отсутствия</th>
+            </tr>
+            </thead>
+            {% for d in data %}
+                <tr>
+                    <td>{{ d.contact_center }}</td>
+                    <td>{{ d.scheduled_time }}</td>
+                    <td>{{ d.ready }}</td>
+                    <td>{{ d.share_ready|percent }}%</td>
+                    <td>{{ d.adherence|percent }}%</td>
+                    <td>{{ d.sick_leave }}</td>
+                    <td>{{ d.absenteeism }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.js"
+            integrity="sha512-d6nObkPJgV791iTGuBoVC9Aa2iecqzJRE0Jiqvk85BhLHAPhWqkuBiQb1xz2jvuHNqHLYoN3ymPfpiB1o+Zgpw=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        console.log([
+            {% for item in data %}
+                "{{ item.contact_center }}",
+            {% endfor %}
+        ])
+        window.onload = function () {
+            const data = {
+                labels: [
+                    {% for d in data %}
+                        "{{ d.contact_center }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    type: 'bar',
+                    label: 'Ready',
+                    data: [
+                        {% for d in data %}
+                            {{ d.ready }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(0, 185, 86, 1)'
+                }, {
+                    type: 'bar',
+                    label: 'Запланированное время',
+                //This setting hidden data
+                    hidden: true,
+                    data: [
+                        {% for d in data %}
+                            {{ d.scheduled_time }},
+                        {% endfor %}
+                    ],
+                    fill: false,
+                    backgroundColor: 'rgb(115, 25, 130)'
+                }]
+            };
+            const config = {
+                type: 'scatter',
+                data: data,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 16
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var ctx = document.getElementById('chart').getContext('2d');
+            window.myLine = new Chart(ctx, config);
+        };
+    </script>
+
+{% endblock %}
