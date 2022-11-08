@@ -56,7 +56,8 @@ class ReportData(BaseModel):
     full_name = models.CharField(max_length=255, verbose_name='ФИО')
     group = models.ForeignKey(Group, on_delete=models.PROTECT, verbose_name='Группа')
     job = models.ForeignKey(JobTitle, on_delete=models.PROTECT, verbose_name='Должность')
-    contact_center = models.ForeignKey(Area, on_delete=models.PROTECT, verbose_name='Площадка')
+    contact_center = models.ForeignKey(Area, on_delete=models.PROTECT, verbose_name='Площадка',
+                                       related_name='contact_center')
     scheduled_time = models.PositiveSmallIntegerField(verbose_name='запланированное время')
     ready = models.PositiveSmallIntegerField(verbose_name='Ready')
     share_ready = models.FloatField(verbose_name='Доля ready')

@@ -20,13 +20,13 @@
             </thead>
             {% for d in data %}
                 <tr>
-                    <td>{{ d.contact_center }}</td>
-                    <td>{{ d.scheduled_time }}</td>
-                    <td>{{ d.ready }}</td>
-                    <td>{{ d.share_ready|percent }}%</td>
-                    <td>{{ d.adherence|percent }}%</td>
-                    <td>{{ d.sick_leave }}</td>
-                    <td>{{ d.absenteeism }}</td>
+                    <td>{{ d.contact_center__area_name }}</td>
+                    <td>{{ d.scheduled_time_sum|numeric }}</td>
+                    <td>{{ d.ready_sum|numeric }}</td>
+                    <td>{{ d.share_ready_avg|percent }}%</td>
+                    <td>{{ d.adherence_avg|percent }}%</td>
+                    <td>{{ d.sick_leave_sum }}</td>
+                    <td>{{ d.absenteeism_sum }}</td>
                 </tr>
             {% endfor %}
         </table>
@@ -38,14 +38,14 @@
     <script>
         console.log([
             {% for item in data %}
-                "{{ item.contact_center }}",
+                "{{ item.contact_center__area_name }}",
             {% endfor %}
         ])
         window.onload = function () {
             const data = {
                 labels: [
                     {% for d in data %}
-                        "{{ d.contact_center }}",
+                        "{{ d.contact_center__area_name }}",
                     {% endfor %}
                 ],
                 datasets: [{
@@ -53,7 +53,7 @@
                     label: 'Ready',
                     data: [
                         {% for d in data %}
-                            {{ d.ready }},
+                            {{ d.ready_sum }},
                         {% endfor %}
                     ],
                     backgroundColor: 'rgba(0, 185, 86, 1)'
@@ -64,7 +64,7 @@
                     hidden: true,
                     data: [
                         {% for d in data %}
-                            {{ d.scheduled_time }},
+                            {{ d.scheduled_time_sum }},
                         {% endfor %}
                     ],
                     fill: false,

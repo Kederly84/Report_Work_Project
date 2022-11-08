@@ -3,6 +3,7 @@ import os
 from django.core.files.storage import FileSystemStorage
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.db.models import Avg, Sum, Subquery
 
 from config.settings import MEDIA_ROOT
 from reportapp.task import insert_data
@@ -57,5 +58,13 @@ class ContactCenterView(TemplateView):
         else:
             date = ReportData.objects.order_by('-date').values('date').first()
             date = date['date'].strftime('%Y-%m-%d')
-        context['data'] = contact_center_service(date)
+        # context['data'] = contact_center_service(date)
+        context['data'] = ReportData.objects.filter(date=date).values('contact_center__area_name').annotate(
+            scheduled_time_sum=Sum('scheduled_time'),
+            ready_sum=Sum('ready'),
+            share_ready_avg=Avg('share_ready'),
+            adherence_avg=Avg('adherence'),
+            sick_leave_sum=Sum('sick_leave'),
+            absenteeism_sum=Sum('absenteeism'))
+        # print(context['data'])
         return context
