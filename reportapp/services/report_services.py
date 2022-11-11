@@ -1,7 +1,9 @@
+from django.db.models import Avg, Sum
+
 from reportapp.models import ReportData, Area
 
 
-def contact_center_service(date: str):
+def contact_center_view_service(date: str) -> list:
     data = ReportData.objects.filter(date=date)
     contact_centers = list(Area.objects.order_by().values_list('area_name', flat=True).distinct())
     res = []
@@ -33,3 +35,53 @@ def contact_center_service(date: str):
     return res
 
 
+def contact_center_detail_service(pk: int, start_date: str = None, end_date: str = None):
+    if start_date and end_date:
+        data = ReportData.objects.filter(contact_center=pk,
+                                         date__range=[start_date, end_date]).values(
+            'date',
+            'contact_center__area_name', 'contact_center').annotate(
+            scheduled_time_sum=Sum('scheduled_time'),
+            ready_sum=Sum('ready'),
+            share_ready_avg=Avg('share_ready'),
+            adherence_avg=Avg('adherence'),
+            sick_leave_sum=Sum('sick_leave'),
+            absenteeism_sum=Sum('absenteeism'))
+    else:
+        date = ReportData.objects.order_by('-date').values('date').first()
+        date = date['date'].strftime('%Y')
+        data = ReportData.objects.filter(contact_center=pk, date__year=date).values(
+            'date',
+            'contact_center__area_name', 'contact_center').annotate(
+            scheduled_time_sum=Sum('scheduled_time'),
+            ready_sum=Sum('ready'),
+            share_ready_avg=Avg('share_ready'),
+            adherence_avg=Avg('adherence'),
+            sick_leave_sum=Sum('sick_leave'),
+            absenteeism_sum=Sum('absenteeism'))
+    return data
+
+
+# def group_detail_service(pk: int, start_date: str = None, end_date: str = None):
+#     if start_date and end_date:
+#         data = ReportData.objects.filter(contact_center=pk,
+#                                          date__range=[start_date, end_date]).values(
+#             'group__group_name', 'group').annotate(
+#             scheduled_time_sum=Sum('scheduled_time'),
+#             ready_sum=Sum('ready'),
+#             share_ready_avg=Avg('share_ready'),
+#             adherence_avg=Avg('adherence'),
+#             sick_leave_sum=Sum('sick_leave'),
+#             absenteeism_sum=Sum('absenteeism'))
+#     else:
+#         date = ReportData.objects.order_by('-date').values('date').first()
+#         date = date['date'].strftime('%Y-%m-%d')
+#         data = ReportData.objects.filter(contact_center=pk,
+#                                          date=date).values(
+#             'group__group_name', 'group').annotate(
+#             scheduled_time_sum=Sum('scheduled_time'),
+#             ready_sum=Sum('ready'),
+#             share_ready_avg=Avg('share_ready'),
+#             adherence_avg=Avg('adherence'),
+#             sick_leave_sum=Sum('sick_leave'),
+#             absenteeism_sum=Sum('absenteeism'))

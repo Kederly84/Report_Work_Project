@@ -5,7 +5,8 @@ from reportapp import views
 app_name = ReportappConfig.name
 
 urlpatterns = [
-    path('', views.home, name='home'),
     path('upload/', views.upload, name='upload'),
-    path('report/', views.ContactCenterView.as_view(), name='report')
+    path('', views.ContactCenterView.as_view(), name='home'),
+    path('<int:pk>/detail_cc/', views.contact_center_detail, name='center_detail'),
+    path('<int:pk>/group/', views.GroupView.as_view(), name='group')
 ]
