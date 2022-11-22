@@ -16,3 +16,8 @@ def numeric(num: int) -> float:
 @register.filter
 def first_name(fio: str) -> str:
     return fio.split(" ")[0]
+
+
+@register.filter
+def float_replasment(num: float) -> str:
+    return str(num)

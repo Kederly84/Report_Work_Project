@@ -1,5 +1,6 @@
 import csv
 import datetime
+
 from reportapp.models import Area, Group, JobTitle, ReportData
 from config.settings import MEDIA_ROOT
 
@@ -31,15 +32,17 @@ def insert_data(file_name: str):
     if isinstance(file, list):
         for f in file:
             report_data = ReportData()
-            report_data.date = f[0]
-            report_data.full_name = f[1]
-            report_data.group = Group.objects.filter(group_name=f[2]).first()
-            report_data.job = JobTitle.objects.filter(position=f[3]).first()
-            report_data.contact_center = Area.objects.filter(area_name=f[4]).first()
-            report_data.scheduled_time = f[5]
-            report_data.ready = f[6]
-            report_data.share_ready = f[7]
-            report_data.adherence = f[8]
+            report_data.date = f['date']
+            report_data.full_name = f['full_name']
+            report_data.group = Group.objects.filter(group_name=f['group']).first()
+            report_data.job = JobTitle.objects.filter(position=f['job']).first()
+            report_data.contact_center = Area.objects.filter(area_name=f['contact_center']).first()
+            report_data.scheduled_time = f['scheduled_time']
+            report_data.ready = f['ready']
+            report_data.adherence = f['adherence']
+            report_data.sick_leave = f['sick_leave']
+            report_data.absenteeism = f['absenteeism']
+            report_data.rating = f['rating']
             report_data.save()
     else:
         print(file)
@@ -55,7 +58,12 @@ def open_file(file_name: str):
             if len(row) != 10:
                 return f'В строке {idx} ошибка. Не хватает данных'
             data = validation(row)
-            if isinstance(data, list):
+            if isinstance(data, dict):
+                # Механизм расчета рейтинга пока тестовый
+                if data['absenteeism'] > 10:
+                    data['rating'] = 0
+                else:
+                    data['rating'] = (data['ready'] / data['scheduled_time']) * data['adherence']
                 res.append(data)
                 idx += 1
             else:
@@ -63,19 +71,20 @@ def open_file(file_name: str):
     return res
 
 
-def validation(file_row: list) -> list | str:
-    result = [
-        data_valid_create(file_row[0], file_row[1]),
-        file_row[2],
-        valid_lists(file_row[3], GROUP_LIST),
-        valid_lists(file_row[4], POSITION_LIST),
-        valid_lists(file_row[5], UCC_LIST),
-        numeric_valid(file_row[6]),
-        numeric_valid(file_row[7]),
-        numeric_valid(file_row[8], SPECIAL_CHAR_FOR_SPACE),
-        numeric_valid(file_row[9], SPECIAL_CHAR_FOR_SPACE)
-    ]
-    if ERR_MESSAGE not in result:
+def validation(file_row: list) -> dict[str, str | float] | str:
+    result = {
+        'full_name': file_row[0].strip(),
+        'group': valid_lists(file_row[1], GROUP_LIST),
+        'date': data_valid_create(file_row[2]),
+        'job': valid_lists(file_row[3], POSITION_LIST),
+        'contact_center': valid_lists(file_row[4], UCC_LIST),
+        'absenteeism': numeric_valid(file_row[5]),
+        'scheduled_time': numeric_valid(file_row[6]),
+        'ready': numeric_valid(file_row[7]),
+        'sick_leave': numeric_valid(file_row[8]),
+        'adherence': numeric_valid(file_row[9])
+    }
+    if ERR_MESSAGE not in result.values():
         return result
     else:
         return ERR_MESSAGE
@@ -85,17 +94,24 @@ def valid_lists(title: str, group: list) -> str:
     if title in group:
         return title
     else:
+        print(f'Ошибка в проверке списка {group} пришло значение {title}')
         return ERR_MESSAGE
 
 
-def data_valid_create(year: str, month: str) -> str:
+# ToDo: Не забудь поправить формат даты на Excel
+def data_valid_create(year: str) -> str:
     curr_year = datetime.datetime.now().year
-    if not year.isdigit() and not YEAR_START_SERVICE <= int(year) <= curr_year:
+    try:
+        date = datetime.datetime.strptime(year, '%m/%d/%y')
+        if YEAR_START_SERVICE <= date.year <= curr_year:
+            result = str(date.year) + '-' + str(date.month) + '-' + FIRST_MONTH_DAY
+            return result
+        else:
+            print(f'Ошибка в дате {date}')
+            return ERR_MESSAGE
+    except ValueError:
+        print(f'Ошибка в формате даныт {year}')
         return ERR_MESSAGE
-    if not month.strip().isalpha() and not month.strip().lower() in MONTH_DICT.keys():
-        return ERR_MESSAGE
-    date = year.strip()+'-'+MONTH_DICT[month.strip()]+'-'+FIRST_MONTH_DAY
-    return date
 
 
 def numeric_valid(num: str, sign: str = None) -> float | str:
@@ -108,12 +124,14 @@ def numeric_valid(num: str, sign: str = None) -> float | str:
         if num.count(',') <= 1:
             inter_res = num.split(',')
         else:
+            print('Ошибка в числе на разбивке по запятой')
             return ERR_MESSAGE
     if len(inter_res) == 1 and inter_res[0].isdigit():
         res = float(inter_res[0])
     elif inter_res[0].isdigit() and inter_res[1].isdigit():
         res = float('.'.join(inter_res))
     else:
+        print('Ошибка 1')
         return ERR_MESSAGE
     if sign is not None:
         return res / 100

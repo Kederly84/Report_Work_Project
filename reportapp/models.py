@@ -16,7 +16,7 @@ class BaseModel(models.Model):
 
 
 class Area(BaseModel):
-    area_name = models.CharField(max_length=100, verbose_name='Название площадки')
+    area_name = models.CharField(max_length=100, verbose_name='Название площадки', unique=True)
 
     class Meta:
         verbose_name = 'Площадка'
@@ -28,7 +28,7 @@ class Area(BaseModel):
 
 
 class Group(BaseModel):
-    group_name = models.CharField(max_length=100, verbose_name='Название группы')
+    group_name = models.CharField(max_length=100, verbose_name='Название группы', unique=True)
 
     class Meta:
         verbose_name = 'Группа опереторов'
@@ -40,7 +40,7 @@ class Group(BaseModel):
 
 
 class JobTitle(BaseModel):
-    position = models.CharField(max_length=100, verbose_name='Должность')
+    position = models.CharField(max_length=100, verbose_name='Должность', unique=True)
 
     class Meta:
         verbose_name = 'Должность'
@@ -58,14 +58,14 @@ class ReportData(BaseModel):
     job = models.ForeignKey(JobTitle, on_delete=models.PROTECT, verbose_name='Должность')
     contact_center = models.ForeignKey(Area, on_delete=models.PROTECT, verbose_name='Площадка',
                                        related_name='contact_center')
-    scheduled_time = models.PositiveSmallIntegerField(verbose_name='запланированное время')
-    ready = models.PositiveSmallIntegerField(verbose_name='Ready')
-    share_ready = models.FloatField(verbose_name='Доля ready')
+    scheduled_time = models.FloatField(verbose_name='запланированное время')
+    ready = models.FloatField(verbose_name='Ready')
     adherence = models.FloatField(verbose_name='Соблюдение расписания')
-    sick_leave = models.PositiveSmallIntegerField(default=0, verbose_name='Больничные')
-    absenteeism = models.PositiveSmallIntegerField(default=0, verbose_name='Отсутсвия')
+    sick_leave = models.FloatField(default=0, verbose_name='Больничные')
+    absenteeism = models.FloatField(default=0, verbose_name='Отсутсвия')
+    rating = models.FloatField(default=0, verbose_name='Рейтинг')
 
     class Meta:
         verbose_name = 'Данные отчета'
         verbose_name_plural = 'Данные отчета'
-        ordering = ['date', 'contact_center', 'group', 'full_name']
+        ordering = ['date', 'contact_center', 'group', 'full_name', 'rating']

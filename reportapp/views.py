@@ -1,19 +1,18 @@
 import os
 from datetime import datetime
 
-from django.core.files.storage import FileSystemStorage
 from django.contrib import messages
-from django.http import HttpResponse
+from django.core.files.storage import FileSystemStorage
+from django.db.models import Avg, Sum
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from django.db.models import Avg, Sum, Subquery
-from django.shortcuts import get_object_or_404
 
 from config.settings import MEDIA_ROOT
-from reportapp.task import insert_data
 from reportapp.models import ReportData, Area
-from reportapp.services.report_services import contact_center_view_service, contact_center_detail_service
+from reportapp.services.report_services import contact_center_detail_service, group_detail_service, data_parse
+from reportapp.task import insert_data
 
 
 def home(request):
@@ -71,7 +70,7 @@ class ContactCenterView(TemplateView):
                                                                       'contact_center__area_name').annotate(
             scheduled_time_sum=Sum('scheduled_time'),
             ready_sum=Sum('ready'),
-            share_ready_avg=Avg('share_ready'),
+            rating_avg=Avg('rating'),
             adherence_avg=Avg('adherence'),
             sick_leave_sum=Sum('sick_leave'),
             absenteeism_sum=Sum('absenteeism'))
@@ -134,7 +133,6 @@ def contact_center_detail(request, pk):
     date = ReportData.objects.order_by('date').values('date').filter(
         contact_center=pk).distinct()
     contact_center_name = ReportData.objects.filter(contact_center=pk).values('contact_center__area_name').first()
-    print(data, contact_center_name)
     return render(request, 'reportapp/report.html',
                   {'data': data, 'date': date, 'contact_center_name': contact_center_name})
 
@@ -143,25 +141,36 @@ class GroupView(TemplateView):
     template_name = 'reportapp/report.html'
 
     def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         date = ReportData.objects.order_by('-date').values('date').first()
         if date:
             date = date['date'].strftime('%Y-%m-%d')
         else:
-            return context_data
-        context_data['contact_center'] = get_object_or_404(Area, pk=self.kwargs.get('pk'))
-        context_data['data'] = ReportData.objects.filter(contact_center=context_data['contact_center'],
-                                                         date=date).values('group',
-                                                                           'group__group_name').annotate(
+            return context
+        context['contact_center'] = get_object_or_404(Area, pk=self.kwargs.get('pk'))
+        context['data'] = ReportData.objects.filter(contact_center=context['contact_center'],
+                                                    date=date).values('group',
+                                                                      'group__group_name').annotate(
             scheduled_time_sum=Sum('scheduled_time'),
             ready_sum=Sum('ready'),
-            share_ready_avg=Avg('share_ready'),
+            rating_avg=Avg('rating'),
             adherence_avg=Avg('adherence'),
             sick_leave_sum=Sum('sick_leave'),
             absenteeism_sum=Sum('absenteeism'))
-        context_data['contact_center_name'] = ReportData.objects.values('contact_center__area_name')
-        print(context_data)
-        return context_data
+        context['contact_center_name'] = ReportData.objects.values('contact_center__area_name')
+        print(context)
+        return context
+
+
+def group_detail_view(request, pk):
+    start, end = data_parse(request)
+    print(start, end)
+    data = group_detail_service(pk, start, end)
+    date = ReportData.objects.order_by('date').values('date').filter(group=pk).distinct()
+    gr_name = ReportData.objects.filter(group=pk).values('group__group_name').first()
+    print(data)
+    return render(request, 'reportapp/report.html',
+                  {'data': data, 'date': date, 'gr_name':gr_name})
 
 # def group_view(request, pk):
 #     if request.method == 'POST':

@@ -32,8 +32,9 @@
             <div class="position-sticky pt-3 sidebar-sticky">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link text-warning text-center fs-6" aria-current="page" href="{% url 'report:home' %}">
-{#                            <span data-feather="home" class="align-text-bottom"></span>#}
+                        <a class="nav-link text-warning text-center fs-6" aria-current="page"
+                           href="{% url 'report:home' %}">
+                            {#                            <span data-feather="home" class="align-text-bottom"></span>#}
                             ВЕРНУТЬСЯ НА ГЛАВНУЮ
                         </a>
                     </li>
@@ -46,7 +47,6 @@
                                         aria-controls="contents-collapse">Площадки
                                 </button>
                                 <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
-
                                     {% for item in data %}
                                         {% if item.contact_center %}
                                             <li><a class="nav-link"
@@ -56,8 +56,26 @@
                                             <li></li>
                                         {% endif %}
                                     {% endfor %}
-
                                 </ul>
+                            </li>
+                        {% elif data.first.group__group_name %}
+                            <li class="my-2">
+                                <button class="btn d-inline-flex align-items-center collapsed border-0"
+                                        data-bs-toggle="collapse" aria-expanded="false"
+                                        data-bs-target="#contents-collapse"
+                                        aria-controls="contents-collapse">Группы
+                                </button>
+                                <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
+                            {% for item in data %}
+                                {% if item.group__group_name %}
+                                            <li><a class="nav-link"
+                                                   href="{% url 'report:group_detail' pk=item.group %}">{{ item.group__group_name }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li></li>
+                                        {% endif %}
+                            {% endfor %}
+                              </ul>
                             </li>
                         {% endif %}
 
@@ -89,7 +107,7 @@
                 </ul>
 
                 <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                    <span>Saved reports</span>
+                    <span>Служебный раздел</span>
                 </h6>
                 <ul class="nav flex-column mb-2">
                     <li class="nav-item">
