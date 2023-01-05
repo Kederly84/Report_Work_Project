@@ -1,5 +1,6 @@
 import csv
 import datetime
+from typing import Union
 
 from reportapp.models import Area, Group, JobTitle, ReportData
 from config.settings import MEDIA_ROOT
@@ -71,7 +72,7 @@ def open_file(file_name: str):
     return res
 
 
-def validation(file_row: list) -> dict[str, str | float] | str:
+def validation(file_row: list):
     result = {
         'full_name': file_row[0].strip(),
         'group': valid_lists(file_row[1], GROUP_LIST),
@@ -110,11 +111,11 @@ def data_valid_create(year: str) -> str:
             print(f'Ошибка в дате {date}')
             return ERR_MESSAGE
     except ValueError:
-        print(f'Ошибка в формате даныт {year}')
+        print(f'Ошибка в формате данных {year}')
         return ERR_MESSAGE
 
 
-def numeric_valid(num: str, sign: str = None) -> float | str:
+def numeric_valid(num: str, sign: str = None):
     if sign is not None:
         if num.count(',') <= 1 and num.count(sign) == 1:
             inter_res = num.replace(sign, '').split(',')
