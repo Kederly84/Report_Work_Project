@@ -26,20 +26,20 @@ class ReportDataAdmin(admin.ModelAdmin):
 
 @admin.register(Area)
 class AdminArea(admin.ModelAdmin):
-    list_display = ('area_name',)
+    list_display = ('area_name', 'pk')
     list_per_page = 20
     search_fields = ('area_name',)
 
 
 @admin.register(Group)
 class AdminGroup(admin.ModelAdmin):
-    list_display = ('group_name',)
+    list_display = ('group_name', 'pk')
     list_per_page = 20
     search_fields = ('group_name',)
 
 
 @admin.register(JobTitle)
 class AdminJobTitle(admin.ModelAdmin):
-    list_display = ('position',)
+    list_display = ('position', 'calculated')
     list_per_page = 20
-    search_fields = ('position',)
+    search_fields = ('position', 'calculated')

@@ -21,6 +21,8 @@
         <div class="nav-item text-nowrap">
             {% if user.is_authenticated %}
                 <a class="nav-link px-3 fs-5" href="{% url 'authapp:logout' %}">Выйти</a>
+                {% else %}
+                <a class="nav-link px-3 fs-5" href="{% url 'authapp:login' %}">Войти</a>
             {% endif %}
         </div>
     </div>
@@ -39,18 +41,18 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        {% if not contact_center_name %}
+                        {% if flag == 'cc main view' or flag == 'cc detail view' %}
                             <li class="my-2">
                                 <button class="btn d-inline-flex align-items-center collapsed border-0"
                                         data-bs-toggle="collapse" aria-expanded="false"
                                         data-bs-target="#contents-collapse"
                                         aria-controls="contents-collapse">Площадки
                                 </button>
-                                <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
-                                    {% for item in data %}
-                                        {% if item.contact_center %}
+                                <ul class="list-unstyled ps-3" id="contents-collapse">
+                                    {% for item in cc_list %}
+                                        {% if item.area_name %}
                                             <li><a class="nav-link"
-                                                   href="{% url 'report:center_detail' pk=item.contact_center %}">{{ item.contact_center__area_name }}</a>
+                                                   href="{% url 'report:center_detail' pk=item.pk %}">{{ item.area_name }}</a>
                                             </li>
                                         {% else %}
                                             <li></li>
@@ -58,83 +60,91 @@
                                     {% endfor %}
                                 </ul>
                             </li>
-                        {% elif data.first.group__group_name %}
+                        {% elif flag == 'group main view' or flag == 'group detail view' %}
                             <li class="my-2">
                                 <button class="btn d-inline-flex align-items-center collapsed border-0"
                                         data-bs-toggle="collapse" aria-expanded="false"
                                         data-bs-target="#contents-collapse"
                                         aria-controls="contents-collapse">Группы
                                 </button>
-                                <ul class="list-unstyled ps-3 collapse" id="contents-collapse">
-                            {% for item in data %}
-                                {% if item.group__group_name %}
+                                <ul class="list-unstyled ps-3" id="contents-collapse">
+                                    {% if group_list %}
+                                        {% for group in group_list %}
                                             <li><a class="nav-link"
-                                                   href="{% url 'report:group_detail' pk=item.group %}">{{ item.group__group_name }}</a>
+                                                   href="{% url 'report:group_detail' pk=group.group %}">{{ group.group__group_name }}</a>
                                             </li>
-                                        {% else %}
-                                            <li></li>
-                                        {% endif %}
-                            {% endfor %}
-                              </ul>
-                            </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% for item in data %}
+                                            {% if item.group__group_name %}
+                                                <li><a class="nav-link"
+                                                       href="{% url 'report:group_detail' pk=item.group %}">{{ item.group__group_name }}</a>
+                                                </li>
+                                            {% else %}
+                                                <li></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        </ul>
+                                        </li>
+                                    {% endif %}
                         {% endif %}
 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="shopping-cart" class="align-text-bottom"></span>
-                            Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="users" class="align-text-bottom"></span>
-                            Customers
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="bar-chart-2" class="align-text-bottom"></span>
-                            Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="layers" class="align-text-bottom"></span>
-                            Integrations
-                        </a>
-                    </li>
+                    {#                    <li class="nav-item">#}
+                    {#                        <a class="nav-link" href="#">#}
+                    {#                            <span data-feather="shopping-cart" class="align-text-bottom"></span>#}
+                    {#                            Products#}
+                    {#                        </a>#}
+                    {#                    </li>#}
+                    {#                    <li class="nav-item">#}
+                    {#                        <a class="nav-link" href="#">#}
+                    {#                            <span data-feather="users" class="align-text-bottom"></span>#}
+                    {#                            Customers#}
+                    {#                        </a>#}
+                    {#                    </li>#}
+                    {#                    <li class="nav-item">#}
+                    {#                        <a class="nav-link" href="#">#}
+                    {#                            <span data-feather="bar-chart-2" class="align-text-bottom"></span>#}
+                    {#                            Reports#}
+                    {#                        </a>#}
+                    {#                    </li>#}
+                    {#                    <li class="nav-item">#}
+                    {#                        <a class="nav-link" href="#">#}
+                    {#                            <span data-feather="layers" class="align-text-bottom"></span>#}
+                    {#                            Integrations#}
+                    {#                        </a>#}
+                    {#                    </li>#}
                 </ul>
-
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
-                    <span>Служебный раздел</span>
-                </h6>
-                <ul class="nav flex-column mb-2">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text" class="align-text-bottom"></span>
-                            Current month
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text" class="align-text-bottom"></span>
-                            Last quarter
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text" class="align-text-bottom"></span>
-                            Social engagement
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text" class="align-text-bottom"></span>
-                            Year-end sale
-                        </a>
-                    </li>
-                </ul>
+                {% if user.is_authenticated %}
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                        <span>Служебный раздел</span>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text" class="align-text-bottom"></span>
+                                Current month
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text" class="align-text-bottom"></span>
+                                Last quarter
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text" class="align-text-bottom"></span>
+                                Social engagement
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text" class="align-text-bottom"></span>
+                                Year-end sale
+                            </a>
+                        </li>
+                    </ul>
+                {% endif %}
             </div>
         </nav>
     </div>

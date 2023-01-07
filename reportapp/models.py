@@ -41,6 +41,7 @@ class Group(BaseModel):
 
 class JobTitle(BaseModel):
     position = models.CharField(max_length=100, verbose_name='Должность', unique=True)
+    calculated = models.BooleanField(default=True, verbose_name='Учитывается в расчете')
 
     class Meta:
         verbose_name = 'Должность'

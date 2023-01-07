@@ -1,6 +1,5 @@
 import csv
 import datetime
-from typing import Union
 
 from reportapp.models import Area, Group, JobTitle, ReportData
 from config.settings import MEDIA_ROOT
