@@ -98,7 +98,6 @@ def valid_lists(title: str, group: list) -> str:
         return ERR_MESSAGE
 
 
-# ToDo: Не забудь поправить формат даты на Excel
 def data_valid_create(year: str) -> str:
     curr_year = datetime.datetime.now().year
     try:

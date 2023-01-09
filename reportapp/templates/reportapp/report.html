@@ -64,6 +64,10 @@
         <div class="container justify-content-center text-center fs-3 mt-2">
             {{ name }}
         </div>
+        {% elif flag and flag == 'employee view' %}
+        <div class="container justify-content-center text-center fs-3 mt-2">
+            {{ data.first.group__group_name }} {{ data.first.date|date:"F Y" }}
+        </div>
     {% endif %}
 
     <div class="container justify-content-center mt-2">
@@ -94,7 +98,6 @@
             {% for d in data %}
                 <tr>
                     {% if d.full_name %}
-                        {#                        <td>{{ d.full_name }}</td>#}
                         <td>
                             <a class="fs-6"
                                href="{% url 'report:employee_detail' name=d.full_name %}">{{ d.full_name }}</a>

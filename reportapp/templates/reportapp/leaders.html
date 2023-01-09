@@ -1,0 +1,51 @@
+{% extends 'reportapp/base.html' %}
+{% load extras %}
+
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div class="container-fluid">
+
+            {% if date %}
+                <form method="post" action="">
+                    <div class="row">
+                        {% csrf_token %}
+                        <div class="col-2">
+                            <select class="form-select" aria-label="Default select example" name="leaders_date">
+                                <option selected>Выберите дату</option>
+                                {% for d in date %}
+                                    <option name="start_date"
+                                            value="{{ d.date|date:"Y-m-d" }}">{{ d.date|date:"M Y" }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-1">
+                            <button type="submit" class="btn btn-success">Выбрать</button>
+                        </div>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="container justify-content-center text-center fs-3 mt-2">
+        Лидеры рейтинга за {{ date_label|date:"F Y" }}
+    </div>
+    <div class="container justify-content-center mt-2">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th scope="col">Дата</th>
+                <th scope="col">Сотрудник</th>
+                <th scope="col">Рейтинг</th>
+            </tr>
+            </thead>
+            {% for d in data %}
+                <tr>
+                    <td class="fs-6">{{ d.date|date:"M Y" }}</td>
+                    <td>{{ d.full_name }}</td>
+                    <td>{{ d.rating|percent }}%</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

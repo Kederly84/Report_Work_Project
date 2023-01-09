@@ -108,7 +108,7 @@ def employee_detail_service(name: str, start_date: str = None, end_date: str = N
         date = ReportData.objects.order_by('-date').values('date').first()
         date = date['date'].strftime('%Y')
         data = ReportData.objects.filter(full_name=name,
-                                         date__year=date,).values('date').annotate(
+                                         date__year=date, ).values('date').annotate(
             scheduled_time_sum=Sum('scheduled_time'),
             ready_sum=Sum('ready'),
             rating_avg=Avg('rating'),
@@ -131,3 +131,16 @@ def data_parse(request, start_date: str = None, end_date: str = None):
     except ValueError:
         messages.add_message(request, messages.WARNING, mark_safe("Выберите дату начала и дату конца периода"))
     return start_date, end_date
+
+
+def rating_leaders(leaders: dict) -> list:
+    res = []
+    for leader in leaders:
+        if len(res) < 10:
+            res.append(leader)
+        else:
+            if res[-1]['rating'] == leader['rating']:
+                res.append(leader)
+            else:
+                break
+    return res

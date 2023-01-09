@@ -11,5 +11,6 @@ urlpatterns = [
     path('<int:pk>/group/', views.GroupView.as_view(), name='group'),
     path('<int:pk>/group_detail/', views.GroupDetailView.as_view(), name='group_detail'),
     path('<int:pk>/employee/', views.EmployeeView.as_view(), name='employee'),
-    path('<str:name>/employee_detail/', views.EmployeeDetailView.as_view(), name='employee_detail')
+    path('<str:name>/employee_detail/', views.EmployeeDetailView.as_view(), name='employee_detail'),
+    path('leaders/', views.RatingLeaders.as_view(), name='leaders')
 ]

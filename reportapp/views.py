@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
@@ -11,7 +12,7 @@ from django.views.generic import TemplateView
 from config.settings import MEDIA_ROOT
 from reportapp.models import ReportData, Area
 from reportapp.services.report_services import contact_center_detail_service, group_detail_service, data_parse, \
-    employee_detail_service
+    employee_detail_service, rating_leaders
 from reportapp.task import insert_data
 
 FLAGS = {
@@ -22,10 +23,6 @@ FLAGS = {
     'Employee view': 'employee view',
     'Employee detail view': 'employee detail view'
 }
-
-
-def home(request):
-    return render(request, 'reportapp/home.html')
 
 
 def upload(request):
@@ -218,8 +215,10 @@ class EmployeeView(TemplateView):
         else:
             return context
         context['data'] = ReportData.objects.filter(group=self.kwargs.get('pk'),
-                                                    date=date, job__calculated=True).values('date',
-                                                                                            'full_name').annotate(
+                                                    date=date, job__calculated=True
+                                                    ).values('date',
+                                                             'full_name',
+                                                             'group__group_name').annotate(
             scheduled_time_sum=Sum('scheduled_time'),
             ready_sum=Sum('ready'),
             rating_avg=Avg('rating'),
@@ -227,6 +226,7 @@ class EmployeeView(TemplateView):
             sick_leave_sum=Sum('sick_leave'),
             absenteeism_sum=Sum('absenteeism'))
         context['flag'] = FLAGS['Employee view']
+        print(context)
         return context
 
 
@@ -259,4 +259,39 @@ class EmployeeDetailView(TemplateView):
         context['data'] = employee_detail_service(self.kwargs.get('name'), start, end)
         context['date'] = ReportData.objects.order_by('date').values('date').filter(
             full_name=self.kwargs.get('name')).distinct()
+        return self.render_to_response(context)
+
+
+class RatingLeaders(TemplateView):
+    template_name = 'reportapp/leaders.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        date = ReportData.objects.order_by('-date').values('date').first()
+        if date:
+            date = date['date'].strftime('%Y-%m-%d')
+        else:
+            return context
+        leaders = ReportData.objects.order_by('-rating').filter(date=date).values('full_name', 'rating', 'date')[
+                  :100]
+        context['date'] = ReportData.objects.order_by('-date').values('date').distinct()
+        context['data'] = rating_leaders(leaders)
+        context['date_label'] = datetime.datetime.strptime(date, '%Y-%m-%d')
+        return context
+
+    def post(self, request, **kwargs):
+        context = self.get_context_data(**kwargs)
+        try:
+            date_check = request.POST.get('leaders_date')
+            if date_check:
+                leaders = ReportData.objects.order_by('-rating').filter(date=date_check).values('full_name',
+                                                                                                'rating',
+                                                                                                'date')[:100]
+                context['data'] = rating_leaders(leaders)
+                context['date_label'] = datetime.datetime.strptime(date_check, '%Y-%m-%d')
+            else:
+                messages.add_message(request, messages.WARNING,
+                                     mark_safe("Выберите дату"))
+        except ValueError:
+            messages.add_message(request, messages.WARNING, mark_safe("Выберите дату"))
         return self.render_to_response(context)
