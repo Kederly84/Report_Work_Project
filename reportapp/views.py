@@ -4,7 +4,6 @@ import datetime
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Avg, Sum
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
@@ -117,7 +116,6 @@ class GroupView(TemplateView):
             date = date['date'].strftime('%Y-%m-%d')
         else:
             return context
-        context['contact_center'] = get_object_or_404(Area, pk=self.kwargs.get('pk'))
         context['data'] = ReportData.objects.filter(contact_center=self.kwargs.get('pk'),
                                                     date=date, job__calculated=True).values('group',
                                                                                             'group__group_name').annotate(
@@ -226,7 +224,6 @@ class EmployeeView(TemplateView):
             sick_leave_sum=Sum('sick_leave'),
             absenteeism_sum=Sum('absenteeism'))
         context['flag'] = FLAGS['Employee view']
-        print(context)
         return context
 
 
@@ -282,8 +279,9 @@ class RatingLeaders(TemplateView):
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
         try:
-            date_check = request.POST.get('leaders_date')
+            date_check = datetime.datetime.strptime(request.POST.get('leaders_date'), '%Y-%m-%d')
             if date_check:
+                date_check = request.POST.get('leaders_date')
                 leaders = ReportData.objects.order_by('-rating').filter(date=date_check).values('full_name',
                                                                                                 'rating',
                                                                                                 'date')[:100]
