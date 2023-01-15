@@ -1,8 +1,10 @@
 from http import HTTPStatus
-from django.test import TestCase, Client
-from django.urls import reverse, resolve
-from reportapp.models import Area, Group, JobTitle, ReportData
+
 from django.contrib.messages import get_messages
+from django.test import TestCase
+from django.urls import reverse
+
+from reportapp.models import Area, Group, JobTitle, ReportData
 
 
 class BaseTestClass(TestCase):

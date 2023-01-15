@@ -10,7 +10,7 @@ from django.views.generic import TemplateView
 
 from config.settings import MEDIA_ROOT
 from reportapp.models import ReportData, Area
-from reportapp.services.report_services import contact_center_detail_service, group_detail_service, data_parse, \
+from reportapp.services.report_services import contact_center_detail_service, group_detail_service, dates_parse, \
     employee_detail_service, rating_leaders
 from reportapp.task import insert_data
 
@@ -99,7 +99,7 @@ class ContactCenterDetailView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        start, end = data_parse(request)
+        start, end = dates_parse(request)
         context['data'] = contact_center_detail_service(kwargs['pk'], start, end)
         context['date'] = ReportData.objects.order_by('date').values('date').filter(
             contact_center=self.kwargs.get('pk')).distinct()
@@ -159,7 +159,7 @@ class GroupDetailView(TemplateView):
 
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        start, end = data_parse(request)
+        start, end = dates_parse(request)
         context['data'] = group_detail_service(self.kwargs.get('pk'), start, end)
         context['date'] = ReportData.objects.order_by('date').values('date').filter(
             group=self.kwargs.get('pk')).distinct()
@@ -252,7 +252,7 @@ class EmployeeDetailView(TemplateView):
 
     def post(self, request, **kwargs):
         context = self.get_context_data(**kwargs)
-        start, end = data_parse(request)
+        start, end = dates_parse(request)
         context['data'] = employee_detail_service(self.kwargs.get('name'), start, end)
         context['date'] = ReportData.objects.order_by('date').values('date').filter(
             full_name=self.kwargs.get('name')).distinct()
