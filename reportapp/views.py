@@ -2,11 +2,16 @@ import datetime
 import logging
 import os
 
+from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Avg, Sum
+from django.http import FileResponse
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
+from django.views import View
 from django.views.generic import TemplateView
 
 from config.settings import MEDIA_ROOT
@@ -16,7 +21,6 @@ from reportapp.services.report_services import contact_center_detail_service, gr
 from reportapp.task import insert_data
 
 logger = logging.getLogger(__name__)
-
 
 FLAGS = {
     'CC main view': 'cc main view',
@@ -29,25 +33,30 @@ FLAGS = {
 
 
 def upload(request):
-    if request.method == 'POST' and request.FILES and len(os.listdir(MEDIA_ROOT)) == 0:
-        if request.FILES['upload']:
-            upload_file = request.FILES['upload']
-            if upload_file.name.endswith('.csv'):
-                fss = FileSystemStorage()
-                fss.save(upload_file.name, upload_file)
-                insert_data(upload_file.name)
-            else:
-                messages.add_message(request, messages.WARNING,
-                                     mark_safe("Неверный формат файла"))
-    elif request.method == 'POST' and request.POST.get('delete') == 'Delete':
-        for f in os.listdir(MEDIA_ROOT):
-            os.remove(os.path.join(MEDIA_ROOT, f))
-    with os.scandir(MEDIA_ROOT) as entries:
-        file_url = ''
-        for entry in entries:
-            if entry.is_file():
-                file_url += entry.name
-    return render(request, 'reportapp/upload.html', {'file_url': file_url})
+    if request.user.is_authenticated:
+        if request.method == 'POST' and request.FILES and len(os.listdir(MEDIA_ROOT)) == 0:
+            if request.FILES['upload']:
+                upload_file = request.FILES['upload']
+                if upload_file.name.endswith('.csv'):
+                    fss = FileSystemStorage()
+                    fss.save(upload_file.name, upload_file)
+                    insert_data(upload_file.name)
+                else:
+                    messages.add_message(request, messages.WARNING,
+                                         mark_safe("Неверный формат файла"))
+        elif request.method == 'POST' and request.POST.get('delete') == 'Delete':
+            for f in os.listdir(MEDIA_ROOT):
+                os.remove(os.path.join(MEDIA_ROOT, f))
+        with os.scandir(MEDIA_ROOT) as entries:
+            file_url = ''
+            for entry in entries:
+                if entry.is_file():
+                    file_url += entry.name
+        return render(request, 'reportapp/upload.html', {'file_url': file_url})
+    else:
+        messages.add_message(request, messages.WARNING,
+                             mark_safe("У Вас нет прав для просмотра данной страницы"))
+        return redirect('report:home')
 
 
 class ContactCenterView(TemplateView):
@@ -297,3 +306,29 @@ class RatingLeaders(TemplateView):
         except ValueError:
             messages.add_message(request, messages.WARNING, mark_safe("Выберите дату"))
         return self.render_to_response(context)
+
+
+class LogView(TemplateView):
+    template_name = "reportapp/log_view.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(LogView, self).get_context_data(**kwargs)
+        log_slice = []
+        lines_count = 100
+        last_line = sum(1 for line in open(settings.LOG_FILE))
+        with open(settings.LOG_FILE, "r") as log_file:
+            for i, line in enumerate(log_file):
+                if i < (last_line - lines_count):
+                    continue
+                log_slice.insert(0, f'{i} {line}')
+            context["log"] = "".join(log_slice)
+        return context
+
+
+class LogDownloadView(UserPassesTestMixin, View):
+
+    def test_func(self):
+        return self.request.user.is_authenticated
+
+    def get(self, *args, **kwargs):
+        return FileResponse(open(settings.LOG_FILE, "rb"))
