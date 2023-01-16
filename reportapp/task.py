@@ -1,8 +1,11 @@
 import csv
 import datetime
+import logging
 
 from reportapp.models import Area, Group, JobTitle, ReportData
 from config.settings import MEDIA_ROOT
+
+logger = logging.getLogger(__name__)
 
 YEAR_START_SERVICE = 2022
 FIRST_MONTH_DAY = '01'
@@ -45,7 +48,7 @@ def insert_data(file_name: str):
             report_data.rating = f['rating']
             report_data.save()
     else:
-        print(file)
+        logger.warning(f'При обработке файла {file}')
 
 
 def open_file(file_name: str):
@@ -94,7 +97,7 @@ def valid_lists(title: str, group: list) -> str:
     if title in group:
         return title
     else:
-        print(f'Ошибка в проверке списка {group} пришло значение {title}')
+        logger.warning(f'При обработке файла возникла ошибка: пришло значение {title}, которого нет в списке')
         return ERR_MESSAGE
 
 
@@ -106,10 +109,12 @@ def data_valid_create(year: str) -> str:
             result = str(date.year) + '-' + str(date.month) + '-' + FIRST_MONTH_DAY
             return result
         else:
-            print(f'Ошибка в дате {date}')
+            logger.warning(
+                f'При обработке файла возникла ошибка: '
+                f'дата {date} за пределами диапазона {YEAR_START_SERVICE} и {curr_year}')
             return ERR_MESSAGE
     except ValueError:
-        print(f'Ошибка в формате данных {year}')
+        logger.warning(f'При обработке файла возникла ошибка: в формате данных {year}')
         return ERR_MESSAGE
 
 
@@ -123,14 +128,14 @@ def numeric_valid(num: str, sign: str = None):
         if num.count(',') <= 1:
             inter_res = num.split(',')
         else:
-            print('Ошибка в числе на разбивке по запятой')
+            logger.warning(f'При обработке файла возникла ошибка: ошибка в числе {num} на разбивке по запятой')
             return ERR_MESSAGE
     if len(inter_res) == 1 and inter_res[0].isdigit():
         res = float(inter_res[0])
     elif inter_res[0].isdigit() and inter_res[1].isdigit():
         res = float('.'.join(inter_res))
     else:
-        print('Ошибка 1')
+        logger.warning(f'При обработке файла возникла ошибка: ошибка в формате числа {num}')
         return ERR_MESSAGE
     if sign is not None:
         return res / 100

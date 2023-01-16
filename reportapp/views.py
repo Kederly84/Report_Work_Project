@@ -1,5 +1,6 @@
-import os
 import datetime
+import logging
+import os
 
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
@@ -13,6 +14,9 @@ from reportapp.models import ReportData, Area
 from reportapp.services.report_services import contact_center_detail_service, group_detail_service, dates_parse, \
     employee_detail_service, rating_leaders
 from reportapp.task import insert_data
+
+logger = logging.getLogger(__name__)
+
 
 FLAGS = {
     'CC main view': 'cc main view',
