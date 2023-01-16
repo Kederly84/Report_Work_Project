@@ -147,6 +147,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 LOG_FILE = BASE_DIR / "log" / "main_log.log"
+LOG_FILE_FOR_TASK = BASE_DIR / "log" / "log_for_task" / "task_log.log"
 
 LOGGING = {
     "version": 1,
@@ -166,9 +167,17 @@ LOGGING = {
             "formatter": "console",
         },
         "console": {"class": "logging.StreamHandler", "formatter": "console"},
+        "task": {
+            "level": "WARNING",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_FILE_FOR_TASK,
+            "maxBytes": 1048576,
+            "backupCount": 5,
+            "formatter": "console",
+        },
     },
     "loggers": {
         "django": {"level": "INFO", "handlers": ["file", "console"]},
-        "reportapp.task": {"level": "WARNING", "handlers": ["file", "console"]}
+        "reportapp.task": {"level": "WARNING", "handlers": ["task"]}
     },
 }

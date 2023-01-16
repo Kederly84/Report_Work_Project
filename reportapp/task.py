@@ -104,6 +104,7 @@ def valid_lists(title: str, group: list) -> str:
 def data_valid_create(year: str) -> str:
     curr_year = datetime.datetime.now().year
     try:
+        # ToDo: Поправить дату на формат Excel
         date = datetime.datetime.strptime(year, '%m/%d/%y')
         if YEAR_START_SERVICE <= date.year <= curr_year:
             result = str(date.year) + '-' + str(date.month) + '-' + FIRST_MONTH_DAY
