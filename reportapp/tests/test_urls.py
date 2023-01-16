@@ -1,5 +1,6 @@
 from django.test import SimpleTestCase
 from django.urls import reverse, resolve
+
 from reportapp.views import upload, ContactCenterView, ContactCenterDetailView, GroupView, GroupDetailView, \
     EmployeeView, EmployeeDetailView, RatingLeaders
 
@@ -37,4 +38,3 @@ class TestUrls(SimpleTestCase):
     def test_leaders_url_is_resolved(self):
         url = reverse('report:leaders')
         self.assertEquals(resolve(url).func.view_class, RatingLeaders)
-

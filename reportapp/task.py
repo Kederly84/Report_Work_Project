@@ -2,8 +2,8 @@ import csv
 import datetime
 import logging
 
-from reportapp.models import Area, Group, JobTitle, ReportData
 from config.settings import MEDIA_ROOT
+from reportapp.models import Area, Group, JobTitle, ReportData
 
 logger = logging.getLogger(__name__)
 

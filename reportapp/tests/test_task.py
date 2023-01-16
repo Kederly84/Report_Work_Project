@@ -1,7 +1,8 @@
-from reportapp.tests.test_views import BaseTestClass
-from reportapp.task import valid_lists, data_valid_create, numeric_valid, ERR_MESSAGE
-from reportapp.models import Area, Group, ReportData
 from datetime import datetime
+
+from reportapp.models import Area, Group, ReportData
+from reportapp.task import valid_lists, data_valid_create, numeric_valid, ERR_MESSAGE
+from reportapp.tests.test_views import BaseTestClass
 
 
 class TaskTest(BaseTestClass):
@@ -42,4 +43,3 @@ class TaskTest(BaseTestClass):
         data = '25,25,25'
         result = numeric_valid(data)
         self.assertEqual(result, ERR_MESSAGE)
-

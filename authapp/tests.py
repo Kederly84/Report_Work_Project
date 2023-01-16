@@ -1,8 +1,10 @@
-from django.test import TestCase
-from authapp.models import User
-from django.urls import reverse
 from http import HTTPStatus
+
 from django.contrib.messages import get_messages
+from django.test import TestCase
+from django.urls import reverse
+
+from authapp.models import User
 
 
 class AuthTest(TestCase):

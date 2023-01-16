@@ -1,5 +1,6 @@
-from authapp.models import NULLABLE
 from django.db import models
+
+from authapp.models import NULLABLE
 
 
 class BaseModel(models.Model):

@@ -1,6 +1,7 @@
-from reportapp.apps import ReportappConfig
 from django.urls import path
+
 from reportapp import views
+from reportapp.apps import ReportappConfig
 
 app_name = ReportappConfig.name
 

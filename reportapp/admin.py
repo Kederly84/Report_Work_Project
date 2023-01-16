@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from rangefilter.filters import DateRangeFilter, NumericRangeFilter
 
 from reportapp.models import Area, Group, JobTitle, ReportData
-from rangefilter.filters import DateRangeFilter, NumericRangeFilter
 
 
 @admin.register(ReportData)

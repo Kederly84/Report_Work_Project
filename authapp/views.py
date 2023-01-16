@@ -4,8 +4,8 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
-from authapp.forms import CustomAuthenticationForm
 
+from authapp.forms import CustomAuthenticationForm
 from authapp.models import User
 
 
